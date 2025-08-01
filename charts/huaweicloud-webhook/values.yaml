@@ -17,6 +17,8 @@ image:
   repository: swr.ap-southeast-1.myhuaweicloud.com/huaweiclouddeveloper/cert-manager-webhook-huawei
   tag: latest
   pullPolicy: IfNotPresent
+  privateRegistry:
+    enabled: false
 
 nameOverride: ""
 fullnameOverride: ""
