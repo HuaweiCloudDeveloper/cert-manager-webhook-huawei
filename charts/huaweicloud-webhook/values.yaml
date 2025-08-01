@@ -7,14 +7,14 @@
 # This group name should be **unique**, hence using your own company's domain
 # here is recommended.
 # groupName must match the one set in issuer !
-groupName: acme.mycompany.com
+groupName: acme.miacis.cn
 
 certManager:
   namespace: cert-manager
   serviceAccountName: cert-manager
 
 image:
-  repository: swr.ap-southeast-1.myhuaweicloud.com/huaweiclouddeveloper/cert-manager-webhook-huawei
+  repository: miacis/cert-manager-webhook-huaweicloud
   tag: latest
   pullPolicy: IfNotPresent
   privateRegistry:

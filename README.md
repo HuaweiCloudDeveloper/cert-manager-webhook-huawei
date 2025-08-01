@@ -1,5 +1,13 @@
 # cert-manager-webhook-huawei
 
+本 Fork 新增支持：
+
+✅ 华为云公网 DNS Zone
+
+⚠️ 兼容 cert-manager ≥ 1.18.0（部分功能可能受限）
+
+⚠️ 已在 Kubernetes ≥ 1.30 上验证通过
+
 ## Deployment on CCE
 
 ### Deploy nginx-ingress-controller
