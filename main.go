@@ -90,7 +90,7 @@ type huaweiDNSProviderConfig struct {
 // within a single webhook deployment**.
 // For example, `cloudflare` may be used as the name of a solver.
 func (h *huaweiDNSProviderSolver) Name() string {
-	return "huawei"
+	return "huaweicloud"
 }
 
 // Present is responsible for actually presenting the DNS record with the
