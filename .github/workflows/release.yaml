@@ -1,0 +1,57 @@
+name: Releases
+
+on:
+  push:
+    tags:
+    - v*
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  releases:
+    name: Create draft release
+    runs-on: ubuntu-latest
+    steps:
+    - name: Clone the code
+      uses: actions/checkout@v4
+    - name: Set version info
+      run: |
+        echo "VERSION=${GITHUB_REF_NAME}" >> $GITHUB_ENV
+        PREVIOUS_VERSION=$(git tag --sort=-creatordate | sed -n 2p)
+        if [ -z "$PREVIOUS_VERSION" ]; then
+          PREVIOUS_VERSION=$(git rev-list --max-parents=0 HEAD)
+        fi
+        echo "PREVIOUS_VERSION=$PREVIOUS_VERSION" >> $GITHUB_ENV
+        echo "RELEASE_BRANCH=release-$(echo ${GITHUB_REF_NAME} | grep -Eo '[0-9]\.[0-9]+')" >> $GITHUB_ENV
+        echo "RELEASE_TAG=${GITHUB_REF_NAME}" >> $GITHUB_ENV
+        echo "IMAGE_REPO=$(echo ${GITHUB_REPOSITORY} | awk -F "/" '{print $1}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+        echo "GH_ORG_NAME=${GITHUB_REPOSITORY%%/*}" >> $GITHUB_ENV
+    - name: Setup Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '~1.22'
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    - name: Log into registry ghcr.io
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Build and push
+      run: |
+        echo "Release tag is: $RELEASE_TAG"
+        make docker-buildx
+    - name: Run release
+      run: |
+        echo "Version is: $VERSION"
+        echo "Previous version is: $PREVIOUS_VERSION"
+        echo "Release branch is: $RELEASE_BRANCH"
+        echo "Release tag is: $RELEASE_TAG"
+        make release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
