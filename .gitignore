@@ -4,7 +4,8 @@
 *.dll
 *.so
 *.dylib
-.idea
+bin
+hack/tools/bin
 # Test binary, build with `go test -c`
 *.test
 
@@ -17,3 +18,17 @@ cert-manager-webhook-example
 # Make artifacts
 _out
 _test
+
+out/
+Dockerfile.cross
+
+.idea
+*.iml
+.vscode/
+*.code-workspace
+go.work
+go.work.sum
+
+*~
+*.tmp
+.DS_Store

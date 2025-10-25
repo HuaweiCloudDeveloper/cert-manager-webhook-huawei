@@ -26,6 +26,7 @@ BIN_DIR := bin
 $(BIN_DIR):
 	mkdir -p $@
 
+RELEASE_NOTES_BIN := release-notes
 RELEASE_NOTES := $(BIN_DIR)/$(RELEASE_NOTES_BIN)
 RELEASE_NOTES_PKG := k8s.io/release/cmd/release-notes
 

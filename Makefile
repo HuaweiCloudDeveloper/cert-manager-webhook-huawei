@@ -21,6 +21,14 @@ REPO_ROOT := $(shell git rev-parse --show-toplevel)
 GH_ORG_NAME ?= HuaweiCloudDeveloper
 GH_REPO_NAME ?= cert-manager-webhook-huawei
 
+# Image URL to use all building/pushing image targets
+IMAGE_REPO ?= huaweiclouddeveloper
+STAGING_REGISTRY ?= ghcr.io/$(IMAGE_REPO)
+REGISTRY ?= $(STAGING_REGISTRY)
+CORE_IMAGE_NAME ?= cert-manager-webhook-huawei
+CORE_CONTROLLER_IMG ?= $(REGISTRY)/$(CORE_IMAGE_NAME)
+IMG ?= $(CORE_CONTROLLER_IMG):$(RELEASE_TAG)
+
 GH_REPO ?= $(GH_ORG_NAME)/$(GH_REPO_NAME)
 TOOLS_DIR := hack/tools
 TOOLS_BIN_DIR := $(TOOLS_DIR)/bin
@@ -58,10 +66,10 @@ PLATFORMS ?= linux/arm64,linux/amd64,linux/s390x,linux/ppc64le
 docker-buildx: ## Build and push docker image for the manager for cross-platform support
 	# copy existing Dockerfile and insert --platform=${BUILDPLATFORM} into Dockerfile.cross, and preserve the original Dockerfile
 	sed -e '1 s/\(^FROM\)/FROM --platform=\$$\{BUILDPLATFORM\}/; t' -e ' 1,// s//FROM --platform=\$$\{BUILDPLATFORM\}/' Dockerfile > Dockerfile.cross
-	- $(CONTAINER_TOOL) buildx create --name cert-manager-webhook-huawei-builder
-	$(CONTAINER_TOOL) buildx use cert-manager-webhook-huawei-builder
-	- $(CONTAINER_TOOL) buildx build --push --platform=$(PLATFORMS) --tag ${IMG} -f Dockerfile.cross .
-	- $(CONTAINER_TOOL) buildx rm cert-manager-webhook-huawei-builder
+	- docker buildx create --name cert-manager-webhook-huawei-builder
+	docker buildx use cert-manager-webhook-huawei-builder
+	- docker buildx build --push --platform=$(PLATFORMS) --tag ${IMG} -f Dockerfile.cross .
+	- docker buildx rm cert-manager-webhook-huawei-builder
 	rm Dockerfile.cross
 
 .PHONY: rendered-manifest.yaml
