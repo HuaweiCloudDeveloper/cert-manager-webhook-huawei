@@ -16,12 +16,14 @@ jobs:
     steps:
     - name: Clone the code
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
     - name: Set version info
       run: |
         echo "VERSION=${GITHUB_REF_NAME}" >> $GITHUB_ENV
         PREVIOUS_VERSION=$(git tag --sort=-creatordate | sed -n 2p)
         if [ -z "$PREVIOUS_VERSION" ]; then
-          PREVIOUS_VERSION=$(git rev-list --max-parents=0 HEAD)
+          PREVIOUS_VERSION=$(git rev-list --max-parents=0 HEAD | head -n 1)
         fi
         echo "PREVIOUS_VERSION=$PREVIOUS_VERSION" >> $GITHUB_ENV
         echo "RELEASE_BRANCH=release-$(echo ${GITHUB_REF_NAME} | grep -Eo '[0-9]\.[0-9]+')" >> $GITHUB_ENV
