@@ -1,5 +1,9 @@
 # cert-manager-webhook-huawei
 
+[简体中文](./README_zh.md)
+
+**cert-manager-webhook-huawei** is a Cert-Manager webhook plugin designed for Huawei Cloud. It supports automatic issuance and management of TLS certificates using the DNS-01 challenge, making it easy to deploy and manage HTTPS services on Huawei Cloud CCE clusters.
+
 ## Deployment on CCE
 
 ### Deploy nginx-ingress-controller
