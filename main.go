@@ -114,7 +114,7 @@ func (h *huaweiDNSProviderSolver) Present(ch *v1alpha1.ChallengeRequest) error {
 		return err
 	}
 
-	err = h.addTxtRecord(zoneId, ch.ResolvedZone, ch.ResolvedFQDN, ch.Key)
+	err = h.addTxtRecord(zoneId, ch.ResolvedFQDN, ch.Key)
 	if err != nil {
 		return err
 	}
@@ -268,7 +268,7 @@ func (h *huaweiDNSProviderSolver) getZoneId(resolvedZone string) (string, error)
 
 	var hostedZone dnsMdl.PrivateZoneResp
 	for _, item := range zoneList {
-		if *item.Name == util.UnFqdn(authZone) {
+		if *item.Name == authZone {
 			hostedZone = item
 			break
 		}
@@ -279,12 +279,18 @@ func (h *huaweiDNSProviderSolver) getZoneId(resolvedZone string) (string, error)
 	return fmt.Sprintf("%v", *hostedZone.Id), nil
 }
 
-func (h *huaweiDNSProviderSolver) addTxtRecord(zone, fqdn, value, zoneId string) error {
-	req := &dnsMdl.CreateRecordSetRequest{}
-	req.ZoneId = zoneId
-	req.Body.Name = extractRecordName(fqdn, zone)
-	req.Body.Type = "TXT"
-	req.Body.Records = []string{value}
+func (h *huaweiDNSProviderSolver) addTxtRecord(zoneId, fqdn, key string) error {
+	klog.Infof("Huawei Cloud DNS adding TXT record: ZoneID=%s, FQDN=%s, key=%s", zoneId, fqdn, key)
+	records := []string{key}
+	reqBody := &dnsMdl.CreateRecordSetRequestBody{
+		Name:    fqdn,
+		Type:    "TXT",
+		Records: records,
+	}
+	req := &dnsMdl.CreateRecordSetRequest{
+		Body:   reqBody,
+		ZoneId: zoneId,
+	}
 	resp, err := h.huaweiClient.CreateRecordSet(req)
 	if err != nil {
 		return errors.Wrap(err, "failed to create txt record")
