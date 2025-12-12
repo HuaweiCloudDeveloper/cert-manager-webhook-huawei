@@ -308,7 +308,7 @@ func extractRecordName(fqdn, zone string) string {
 }
 
 func (h *huaweiDNSProviderSolver) getRecords(zoneId, zone, fqdn string) ([]dnsMdl.ListRecordSets, error) {
-	recordName := extractRecordName(fqdn, zone)
+	recordName := fqdn
 	req := &dnsMdl.ListRecordSetsByZoneRequest{}
 	req.ZoneId = zoneId
 	req.Name = &recordName
