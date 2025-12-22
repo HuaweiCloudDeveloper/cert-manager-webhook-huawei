@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/cert-manager/cert-manager/pkg/acme/webhook/apis/acme/v1alpha1"
 	"github.com/cert-manager/cert-manager/pkg/acme/webhook/cmd"
@@ -143,7 +142,7 @@ func (h *huaweiDNSProviderSolver) CleanUp(ch *v1alpha1.ChallengeRequest) error {
 		return err
 	}
 
-	records, err := h.getRecords(zoneId, ch.ResolvedZone, ch.ResolvedFQDN)
+	records, err := h.getRecords(zoneId, ch.ResolvedFQDN)
 	if err != nil {
 		return err
 	}
@@ -153,9 +152,10 @@ func (h *huaweiDNSProviderSolver) CleanUp(ch *v1alpha1.ChallengeRequest) error {
 		if r[0] != ch.Key {
 			continue
 		}
-		req := &dnsMdl.DeleteRecordSetRequest{}
-		req.ZoneId = zoneId
-		req.RecordsetId = *record.Id
+		req := &dnsMdl.DeleteRecordSetRequest{
+			ZoneId:      zoneId,
+			RecordsetId: *record.Id,
+		}
 		resp, err := h.huaweiClient.DeleteRecordSet(req)
 		if err != nil {
 			return errors.Wrap(err, "failed to delete record")
@@ -245,9 +245,10 @@ func (h *huaweiDNSProviderSolver) getHuaweiClient(ch *v1alpha1.ChallengeRequest,
 func (h *huaweiDNSProviderSolver) getZoneId(resolvedZone string) (string, error) {
 	zoneList := make([]dnsMdl.PrivateZoneResp, 0)
 
-	req := &dnsMdl.ListPrivateZonesRequest{}
-	req.Offset = ptr.To[int32](0)
-	req.Limit = ptr.To[int32](50)
+	req := &dnsMdl.ListPrivateZonesRequest{
+		Offset: ptr.To[int32](0),
+		Limit:  ptr.To[int32](50),
+	}
 	totalCount := int32(50)
 
 	for *req.Offset < totalCount {
@@ -299,20 +300,11 @@ func (h *huaweiDNSProviderSolver) addTxtRecord(zoneId, fqdn, key string) error {
 	return nil
 }
 
-func extractRecordName(fqdn, zone string) string {
-	if idx := strings.Index(fqdn, "."+zone); idx != -1 {
-		return fqdn[:idx]
+func (h *huaweiDNSProviderSolver) getRecords(zoneId, fqdn string) ([]dnsMdl.ListRecordSets, error) {
+	req := &dnsMdl.ListRecordSetsByZoneRequest{
+		ZoneId: zoneId,
+		Name:   &fqdn,
 	}
-
-	return util.UnFqdn(fqdn)
-}
-
-func (h *huaweiDNSProviderSolver) getRecords(zoneId, zone, fqdn string) ([]dnsMdl.ListRecordSets, error) {
-	recordName := fqdn
-	req := &dnsMdl.ListRecordSetsByZoneRequest{}
-	req.ZoneId = zoneId
-	req.Name = &recordName
-
 	req.Offset = ptr.To[int32](0)
 	req.Limit = ptr.To[int32](50)
 	totalCount := int32(50)
